@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Trader():
     def __init__(self, num_stock, num_factors_max, delay_time_max, activation_funcs, binary_operators, time_window=None):
         # set hyperparameters
