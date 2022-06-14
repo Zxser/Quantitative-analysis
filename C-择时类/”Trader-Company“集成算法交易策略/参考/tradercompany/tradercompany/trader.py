@@ -2,7 +2,13 @@ import numpy as np
 
 
 class Trader():
-    def __init__(self, num_stock, num_factors_max, delay_time_max, activation_funcs, binary_operators, time_window=None):
+    def __init__(self,
+                 num_stock,
+                 num_factors_max,
+                 delay_time_max,
+                 activation_funcs,
+                 binary_operators,
+                 time_window=None):
         # set hyperparameters
         self.num_stock = num_stock
         self.num_factors_max = num_factors_max
@@ -13,9 +19,11 @@ class Trader():
         self.time_window = time_window
 
         # GMMのための辞書
-        self.dict_activation = dict(zip(activation_funcs, range(len(activation_funcs))))
-        self.dict_binary = dict(zip(binary_operators, range(len(binary_operators))))
-        
+        self.dict_activation = dict(
+            zip(activation_funcs, range(len(activation_funcs))))
+        self.dict_binary = dict(
+            zip(binary_operators, range(len(binary_operators))))
+
         # initialize by stock
         self.num_factors = [np.nan for _ in range(num_stock)]
         self.delay_P = [np.nan for _ in range(num_stock)]
@@ -25,34 +33,59 @@ class Trader():
         self.activation_func = [np.nan for _ in range(num_stock)]
         self.binary_operator = [np.nan for _ in range(num_stock)]
         self.w = [np.nan for _ in range(num_stock)]
-        
+
         self.X_factors = [[] for _ in range(num_stock)]
         self.cumulative_error = [np.nan for _ in range(num_stock)]
-        
+
         # initialized by uniform distribution
         for i_stock in range(num_stock):
-            self.num_factors[i_stock] = np.random.choice(range(1, self.num_factors_max+1))
-            self.delay_P[i_stock] = np.random.choice(delay_time_max, self.num_factors[i_stock])
-            self.delay_Q[i_stock] = np.random.choice(delay_time_max, self.num_factors[i_stock])
-            self.stock_P[i_stock] = np.random.choice(num_stock, self.num_factors[i_stock])
-            self.stock_Q[i_stock] = np.random.choice(num_stock, self.num_factors[i_stock])
-            self.activation_func[i_stock] = np.random.choice(activation_funcs, self.num_factors[i_stock])
-            self.binary_operator[i_stock] = np.random.choice(binary_operators, self.num_factors[i_stock])
+            self.num_factors[i_stock] = np.random.choice(
+                range(1, self.num_factors_max + 1))
+            self.delay_P[i_stock] = np.random.choice(delay_time_max,
+                                                     self.num_factors[i_stock])
+            self.delay_Q[i_stock] = np.random.choice(delay_time_max,
+                                                     self.num_factors[i_stock])
+            self.stock_P[i_stock] = np.random.choice(num_stock,
+                                                     self.num_factors[i_stock])
+            self.stock_Q[i_stock] = np.random.choice(num_stock,
+                                                     self.num_factors[i_stock])
+            self.activation_func[i_stock] = np.random.choice(
+                activation_funcs, self.num_factors[i_stock])
+            self.binary_operator[i_stock] = np.random.choice(
+                binary_operators, self.num_factors[i_stock])
             self.w[i_stock] = np.random.randn(self.num_factors[i_stock])
-        
+
             self.X_factors[i_stock] = np.zeros((0, self.num_factors[i_stock]))
             self.cumulative_error[i_stock] = 0.0
 
     def set_params(self, i_stock, list_params):
         self.num_factors[i_stock] = list_params[0]["num_factor"]
 
-        self.delay_P[i_stock] = [list_params[factor+1]["delay_P"] for factor in range(self.num_factors[i_stock])]
-        self.delay_Q[i_stock] = [list_params[factor+1]["delay_Q"] for factor in range(self.num_factors[i_stock])]
-        self.stock_P[i_stock] = [list_params[factor+1]["stock_P"] for factor in range(self.num_factors[i_stock])]
-        self.stock_Q[i_stock] = [list_params[factor+1]["stock_Q"] for factor in range(self.num_factors[i_stock])]
-        self.activation_func[i_stock] = [self.activation_funcs[list_params[factor+1]["activation_func"]] for factor in range(self.num_factors[i_stock])]
-        self.binary_operator[i_stock] = [self.binary_operators[list_params[factor+1]["binary_operator"]] for factor in range(self.num_factors[i_stock])]
-        
+        self.delay_P[i_stock] = [
+            list_params[factor + 1]["delay_P"]
+            for factor in range(self.num_factors[i_stock])
+        ]
+        self.delay_Q[i_stock] = [
+            list_params[factor + 1]["delay_Q"]
+            for factor in range(self.num_factors[i_stock])
+        ]
+        self.stock_P[i_stock] = [
+            list_params[factor + 1]["stock_P"]
+            for factor in range(self.num_factors[i_stock])
+        ]
+        self.stock_Q[i_stock] = [
+            list_params[factor + 1]["stock_Q"]
+            for factor in range(self.num_factors[i_stock])
+        ]
+        self.activation_func[i_stock] = [
+            self.activation_funcs[list_params[factor + 1]["activation_func"]]
+            for factor in range(self.num_factors[i_stock])
+        ]
+        self.binary_operator[i_stock] = [
+            self.binary_operators[list_params[factor + 1]["binary_operator"]]
+            for factor in range(self.num_factors[i_stock])
+        ]
+
         self.w[i_stock] = np.random.randn(self.num_factors[i_stock])
 
         self.X_factors[i_stock] = np.zeros((0, self.num_factors[i_stock]))
@@ -62,29 +95,38 @@ class Trader():
         list_params = []
         num_factor = self.num_factors[i_stock]
         list_params.append({"num_factor": num_factor})
-        
+
         for factor in range(num_factor):
             dict_ = {}
             dict_["delay_P"] = self.delay_P[i_stock][factor]
             dict_["delay_Q"] = self.delay_Q[i_stock][factor]
             dict_["stock_P"] = self.stock_P[i_stock][factor]
             dict_["stock_Q"] = self.stock_Q[i_stock][factor]
-            dict_["activation_func"] = self.dict_activation[self.activation_func[i_stock][factor]]
-            dict_["binary_operator"] = self.dict_binary[self.binary_operator[i_stock][factor]]
-            
+            dict_["activation_func"] = self.dict_activation[
+                self.activation_func[i_stock][factor]]
+            dict_["binary_operator"] = self.dict_binary[
+                self.binary_operator[i_stock][factor]]
+
             list_params.append(dict_)
 
         return list_params
 
     def reset_params(self, i_stock):
         # initialized by uniform distribution
-        self.num_factors[i_stock] = np.random.choice(range(1, self.num_factors_max+1))
-        self.delay_P[i_stock] = np.random.choice(self.delay_time_max, self.num_factors[i_stock])
-        self.delay_Q[i_stock] = np.random.choice(self.delay_time_max, self.num_factors[i_stock])
-        self.stock_P[i_stock] = np.random.choice(self.num_stock, self.num_factors[i_stock])
-        self.stock_Q[i_stock] = np.random.choice(self.num_stock, self.num_factors[i_stock])
-        self.activation_func[i_stock] = np.random.choice(self.activation_funcs, self.num_factors[i_stock])
-        self.binary_operator[i_stock] = np.random.choice(self.binary_operators, self.num_factors[i_stock])
+        self.num_factors[i_stock] = np.random.choice(
+            range(1, self.num_factors_max + 1))
+        self.delay_P[i_stock] = np.random.choice(self.delay_time_max,
+                                                 self.num_factors[i_stock])
+        self.delay_Q[i_stock] = np.random.choice(self.delay_time_max,
+                                                 self.num_factors[i_stock])
+        self.stock_P[i_stock] = np.random.choice(self.num_stock,
+                                                 self.num_factors[i_stock])
+        self.stock_Q[i_stock] = np.random.choice(self.num_stock,
+                                                 self.num_factors[i_stock])
+        self.activation_func[i_stock] = np.random.choice(
+            self.activation_funcs, self.num_factors[i_stock])
+        self.binary_operator[i_stock] = np.random.choice(
+            self.binary_operators, self.num_factors[i_stock])
         self.w[i_stock] = np.random.randn(self.num_factors[i_stock])
 
         self.X_factors[i_stock] = np.zeros((0, self.num_factors[i_stock]))
@@ -99,15 +141,17 @@ class Trader():
         Qj = self.stock_Q[i_stock][j]
         Dj = self.delay_P[i_stock][j]
         Fj = self.delay_Q[i_stock][j]
-        return Aj(Oj(data[Pj][self.delay_time_max-Dj], data[Qj][self.delay_time_max-Fj]))
-    
+        return Aj(
+            Oj(data[Pj][self.delay_time_max - Dj],
+               data[Qj][self.delay_time_max - Fj]))
+
     def calc_factors(self, data, i_stock):
         num_factors = self.num_factors[i_stock]
         factors = np.zeros(num_factors)
-        for j in range(num_factors): # 各ファクターごとに
+        for j in range(num_factors):  # 各ファクターごとに
             factors[j] = self.calc_factor(data, i_stock, j)
         return factors
-    
+
     def stack_factors(self, data, i_stock):
         """
         time_windowの数だけ計算した項(factors)をX_factorsに保存する
@@ -115,37 +159,42 @@ class Trader():
         """
         factors = self.calc_factors(data, i_stock)
         if self.time_window is None:
-            self.X_factors[i_stock] = np.vstack([self.X_factors[i_stock], factors])
+            self.X_factors[i_stock] = np.vstack(
+                [self.X_factors[i_stock], factors])
         elif len(self.X_factors[i_stock]) < self.time_window:
-            self.X_factors[i_stock] = np.vstack([self.X_factors[i_stock], factors])
+            self.X_factors[i_stock] = np.vstack(
+                [self.X_factors[i_stock], factors])
         else:
-            # 
-            self.X_factors[i_stock] = np.roll(self.X_factors[i_stock], -1, axis = 0)
+            #
+            self.X_factors[i_stock] = np.roll(self.X_factors[i_stock],
+                                              -1,
+                                              axis=0)
             self.X_factors[i_stock][-1] = factors
         return None
-    
+
     def learn(self, y, i_stock):
         epsilon = 0.0001
         X = self.X_factors[i_stock]
         if self._check_rank_deficient(i_stock):
             self.w[i_stock] = np.zeros(len(self.w[i_stock]))
         else:
-            self.w[i_stock] = np.linalg.inv(X.T.dot(X) + epsilon).dot(X.T).dot(y)
-    
+            self.w[i_stock] = np.linalg.inv(X.T.dot(X) + epsilon).dot(
+                X.T).dot(y)
+
     def _check_rank_deficient(self, i_stock):
         """ ランク落ちを確認
         """
         X = self.X_factors[i_stock]
         return np.linalg.matrix_rank(X.T.dot(X)) < self.num_factors[i_stock]
-        
-    def predict(self): # test dataに対するprediction, これに基づいてモデルの評価を行う．
+
+    def predict(self):  # test dataに対するprediction, これに基づいてモデルの評価を行う．
         """ 最新のfactorsを使用して次の時刻の予測を行う
         """
         y_pred = np.zeros(self.num_stock)
         for i_stock in range(self.num_stock):
             y_pred[i_stock] = self.X_factors[i_stock][-1].dot(self.w[i_stock])
         return y_pred
-    
+
     def predict_for_X_factors(self):
         """ len(X_factors) < time_windowの時エラー
         """
@@ -153,7 +202,7 @@ class Trader():
         for i_stock in range(self.num_stock):
             y_preds[i_stock] = self.X_factors[i_stock].dot(self.w[i_stock])
         return y_preds
-    
+
     def calc_cumulative_error(self, y_true):
         y_preds = self.predict_for_X_factors()
         errors = (y_preds - y_true)**2.0
