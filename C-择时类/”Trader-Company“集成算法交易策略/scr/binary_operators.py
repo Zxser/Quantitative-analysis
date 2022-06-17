@@ -2,30 +2,47 @@
 Author: hugo2046 shen.lan123@gmail.com
 Date: 2022-06-12 21:10:12
 LastEditors: hugo2046 shen.lan123@gmail.com
-LastEditTime: 2022-06-12 22:23:13
+LastEditTime: 2022-06-17 18:11:39
 Description: 符号系统
 '''
-from operator import add
-from operator import mul as multiple
-from operator import sub as diff
 
-# def add(x, y):
-#     return x + y
+from typing import Union
 
-# def diff(x, y):
-#     return x - y
-
-# def multiple(x, y):
-#     return x * y
+import numpy as np
 
 
-def get_x(x, y):
+def add(x: Union[int, np.ndarray],
+        y: Union[int, np.ndarray] = None) -> Union[int, np.ndarray]:
+
+    return np.add(x, y)
+
+
+def diff(x: Union[int, np.ndarray],
+         y: Union[int, np.ndarray] = None) -> Union[int, np.ndarray]:
+
+    return np.subtract(x, y)
+
+
+def multiple(x: Union[int, np.ndarray],
+             y: Union[int, np.ndarray] = None) -> Union[int, np.ndarray]:
+
+    return np.multiply(x, y)
+
+
+def get_x(x: Union[int, np.ndarray],
+          y: Union[int, np.ndarray] = None) -> Union[int, np.ndarray]:
     return x
 
 
-def get_y(x, y):
+def get_y(x: Union[int, np.ndarray],
+          y: Union[int, np.ndarray] = None) -> Union[int, np.ndarray]:
     return y
 
 
-def x_is_greater_than_y(x, y):
-    return (x > y) * 1.0
+def x_is_greater_than_y(
+        x: Union[int, np.ndarray],
+        y: Union[int, np.ndarray] = None) -> Union[int, np.ndarray]:
+    return np.greater(x, y) * 1.0
+
+
+def 
