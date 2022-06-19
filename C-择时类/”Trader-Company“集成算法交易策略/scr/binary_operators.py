@@ -2,7 +2,7 @@
 Author: hugo2046 shen.lan123@gmail.com
 Date: 2022-06-12 21:10:12
 LastEditors: hugo2046 shen.lan123@gmail.com
-LastEditTime: 2022-06-17 18:11:39
+LastEditTime: 2022-06-19 16:19:05
 Description: 符号系统
 '''
 
@@ -45,4 +45,3 @@ def x_is_greater_than_y(
     return np.greater(x, y) * 1.0
 
 
-def 
