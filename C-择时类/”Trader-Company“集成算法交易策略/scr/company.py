@@ -56,7 +56,7 @@ class Company:
                 self.fire_and_recruit(t, y_true)
 
         # 最后一个时刻 t 的数据显示educate只能是 stock，因为没有 t + 1的数据可用
-        # stock否则我们在用 self.agomez 预测时会用到 t-1的数据来预测时间 t
+        # stock否则我们在用self.aggregate()预测时会用到 t-1的数据来预测时间 t
         data_to_stack = y_train[:, t - self.delay_time_max:t + 1]
         self.observe(data_to_stack)
 
